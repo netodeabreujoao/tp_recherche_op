@@ -51,6 +51,7 @@ s = [model.add_var(name="s_" + str(i), var_type=CONTINUOUS) for i in range(nbPer
 
 
 model.objective = minimize(xsum(couts[i]*x[i] + cfixes[i]*y[i] + cstock*s[i] for i in range(nbPeriodes)))
+model.max_seconds = 180
 
 M = sum(demandes)
 # période 0
@@ -70,29 +71,37 @@ for i in range(nbPeriodes):
 
 #model.write("test.lp")
 
+# Mesure du temps
+start_time = time.time()
 status = model.optimize()
+end_time = time.time()
 
-print("\n----------------------------------")
+print("\n" + "-"*50)
+# 1) Statut
 if status == OptimizationStatus.OPTIMAL:
-    print("Status de la résolution: OPTIMAL")
+    print("Status de la résolution : OPTIMAL")
 elif status == OptimizationStatus.FEASIBLE:
-    print("Status de la résolution: TEMPS LIMITE et SOLUTION REALISABLE CALCULEE")
+    print("Status de la résolution : TEMPS LIMITE et SOLUTION RÉALISABLE CALCULÉE")
 elif status == OptimizationStatus.NO_SOLUTION_FOUND:
-    print("Status de la résolution: TEMPS LIMITE et AUCUNE SOLUTION CALCULEE")
-elif status == OptimizationStatus.INFEASIBLE or status == OptimizationStatus.INT_INFEASIBLE:
-    print("Status de la résolution: IRREALISABLE")
+    print("Status de la résolution : TEMPS LIMITE et AUCUNE SOLUTION CALCULÉE")
+elif status in (OptimizationStatus.INFEASIBLE, OptimizationStatus.INT_INFEASIBLE):
+    print("Status de la résolution : IRRÉALISABLE")
 elif status == OptimizationStatus.UNBOUNDED:
-    print("Status de la résolution: NON BORNE")
-    
-if model.num_solutions>0:
-    print("Solution calculée")
-    print("-> Valeur de la fonction objectif de la solution calculée : ",  model.objective_value)
-    for i in range(nbPeriodes):
-        print("\t",i, " : ", x[i].x, " unités produites")
-        print("\t",i, " : ", s[i].x, " unités en stock")
-        print("\t",i, " : ", y[i].x, " production lancée")
-        print("\t",i, " : ", demandes[i], " unités demandées")
-        print("")
+    print("Status de la résolution : NON BORNÉ")
+else:
+    print(f"Status de la résolution : {status}")
 
-    print("\n \t Implémentez l'affichage de la solution !")
+print(f"Temps d'exécution        : {end_time - start_time:.2f} s")
 
+# 3) Solution détaillée
+# if model.num_solutions > 0:
+#     print("\nSolution calculée :")
+#     print("→ Valeur de la fct objectif :", model.objective_value)
+#     for i in range(nbPeriodes):
+#         print(f"\tPériode {i} : production = {x[i].x:.0f}, "
+#               f"stock = {s[i].x:.0f}, lancement = {y[i].x:.0f}, "
+#               f"demandes = {demandes[i]}")
+# else:
+#     print("\nAucune solution disponible.")
+
+print("-"*50)
