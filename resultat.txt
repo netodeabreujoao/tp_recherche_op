@@ -1,0 +1,146 @@
+21.1
+
+----------------------------------
+Status de la résolution: OPTIMAL
+Solution calculée
+-> Valeur de la fonction objectif de la solution calculée :  13068.0
+	 0  :  206.0  unités produites
+	 0  :  176.0  unités en stock
+	 0  :  1.0  production lancée
+	 0  :  30  unités demandées
+
+	 1  :  0.0  unités produites
+	 1  :  151.0  unités en stock
+	 1  :  0.0  production lancée
+	 1  :  25  unités demandées
+
+	 2  :  0.0  unités produites
+	 2  :  136.0  unités en stock
+	 2  :  0.0  production lancée
+	 2  :  15  unités demandées
+
+	 3  :  0.0  unités produites
+	 3  :  89.0  unités en stock
+	 3  :  0.0  production lancée
+	 3  :  47  unités demandées
+
+	 4  :  0.0  unités produites
+	 4  :  55.0  unités en stock
+	 4  :  0.0  production lancée
+	 4  :  34  unités demandées
+
+	 5  :  0.0  unités produites
+	 5  :  45.0  unités en stock
+	 5  :  0.0  production lancée
+	 5  :  10  unités demandées
+
+	 6  :  0.0  unités produites
+	 6  :  30.0  unités en stock
+	 6  :  0.0  production lancée
+	 6  :  15  unités demandées
+
+	 7  :  0.0  unités produites
+	 7  :  0.0  unités en stock
+	 7  :  0.0  production lancée
+	 7  :  30  unités demandées
+
+	 8  :  322.0  unités produites
+	 8  :  297.0  unités en stock
+	 8  :  1.0  production lancée
+	 8  :  25  unités demandées
+
+	 9  :  0.0  unités produites
+	 9  :  282.0  unités en stock
+	 9  :  0.0  production lancée
+	 9  :  15  unités demandées
+
+	 10  :  0.0  unités produites
+	 10  :  235.0  unités en stock
+	 10  :  0.0  production lancée
+	 10  :  47  unités demandées
+
+	 11  :  0.0  unités produites
+	 11  :  201.0  unités en stock
+	 11  :  0.0  production lancée
+	 11  :  34  unités demandées
+
+	 12  :  0.0  unités produites
+	 12  :  191.0  unités en stock
+	 12  :  0.0  production lancée
+	 12  :  10  unités demandées
+
+	 13  :  0.0  unités produites
+	 13  :  176.0  unités en stock
+	 13  :  0.0  production lancée
+	 13  :  15  unités demandées
+
+	 14  :  0.0  unités produites
+	 14  :  146.0  unités en stock
+	 14  :  0.0  production lancée
+	 14  :  30  unités demandées
+
+	 15  :  0.0  unités produites
+	 15  :  121.0  unités en stock
+	 15  :  0.0  production lancée
+	 15  :  25  unités demandées
+
+	 16  :  0.0  unités produites
+	 16  :  106.0  unités en stock
+	 16  :  0.0  production lancée
+	 16  :  15  unités demandées
+
+	 17  :  0.0  unités produites
+	 17  :  59.0  unités en stock
+	 17  :  0.0  production lancée
+	 17  :  47  unités demandées
+
+	 18  :  0.0  unités produites
+	 18  :  25.0  unités en stock
+	 18  :  0.0  production lancée
+	 18  :  34  unités demandées
+
+	 19  :  0.0  unités produites
+	 19  :  15.0  unités en stock
+	 19  :  0.0  production lancée
+	 19  :  10  unités demandées
+
+	 20  :  0.0  unités produites
+	 20  :  0.0  unités en stock
+	 20  :  0.0  production lancée
+	 20  :  15  unités demandées
+
+
+ 	 Implémentez l'affichage de la solution !
+Cgl0004I processed model has 60 rows, 61 columns (61 integer (20 of which binary)) and 140 elements
+Coin3009W Conflict graph built in 0.000 seconds, density: 0.267%
+Cgl0015I Clique Strengthening extended 0 cliques, 0 were dominated
+Cbc0045I Nauty did not find any useful orbits in time 0.000273
+Cbc0012I Integer solution of 59617 found by DiveCoefficient after 0 iterations and 0 nodes (0.00 seconds)
+Cbc0012I Integer solution of 32359 found by DiveCoefficient after 1469 iterations and 0 nodes (0.31 seconds)
+Cbc0031I 9 added rows had average density of 46.555556
+Cbc0013I At root node, 9 cuts changed objective from 8219.2727 to 10843.207 in 100 passes
+Cbc0014I Cut generator 0 (Probing) - 124 row cuts average 2.3 elements, 9 column cuts (9 active)  in 0.019 seconds - new frequency is 1
+Cbc0014I Cut generator 1 (Gomory) - 1064 row cuts average 48.7 elements, 0 column cuts (0 active)  in 0.050 seconds - new frequency is 1
+Cbc0014I Cut generator 2 (Knapsack) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.011 seconds - new frequency is -100
+Cbc0014I Cut generator 3 (Clique) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.002 seconds - new frequency is -100
+Cbc0014I Cut generator 4 (OddWheel) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.001 seconds - new frequency is -100
+Cbc0014I Cut generator 5 (MixedIntegerRounding2) - 12 row cuts average 20.2 elements, 0 column cuts (0 active)  in 0.031 seconds - new frequency is -100
+Cbc0014I Cut generator 6 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.014 seconds - new frequency is -100
+Cbc0014I Cut generator 7 (TwoMirCuts) - 88 row cuts average 16.3 elements, 0 column cuts (0 active)  in 0.006 seconds - new frequency is 1
+Cbc0014I Cut generator 8 (ZeroHalf) - 13 row cuts average 2.0 elements, 0 column cuts (0 active)  in 0.022 seconds - new frequency is -100
+Cbc0012I Integer solution of 26721 found by DiveCoefficient after 1575 iterations and 2 nodes (0.35 seconds)
+Cbc0012I Integer solution of 23949 found by DiveCoefficient after 1576 iterations and 3 nodes (0.36 seconds)
+Cbc0012I Integer solution of 21869 found by DiveCoefficient after 1613 iterations and 7 nodes (0.41 seconds)
+Cbc0012I Integer solution of 20101 found by DiveCoefficient after 1614 iterations and 8 nodes (0.42 seconds)
+Cbc0012I Integer solution of 16901 found by DiveCoefficient after 1633 iterations and 10 nodes (0.43 seconds)
+Cbc0016I Integer solution of 16103 found by strong branching after 1660 iterations and 12 nodes (0.43 seconds)
+Cbc0012I Integer solution of 13929 found by DiveCoefficient after 1663 iterations and 14 nodes (0.44 seconds)
+Cbc0016I Integer solution of 13638 found by strong branching after 1806 iterations and 23 nodes (0.48 seconds)
+Cbc0016I Integer solution of 13221 found by strong branching after 2025 iterations and 40 nodes (0.53 seconds)
+Cbc0038I Full problem 60 rows 61 columns, reduced to 12 rows 13 columns
+Cbc0012I Integer solution of 13068 found by RINS after 2067 iterations and 42 nodes (0.56 seconds)
+Cbc0001I Search completed - best objective 13068, took 2250 iterations and 49 nodes (0.59 seconds)
+Cbc0032I Strong branching done 670 times (2222 iterations), fathomed 7 nodes and fixed 27 variables
+Cbc0035I Maximum depth 12, 36 variables fixed on reduced cost
+Total time (CPU seconds):       0.49   (Wallclock seconds):       0.61
+

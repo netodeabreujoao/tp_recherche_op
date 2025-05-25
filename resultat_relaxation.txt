@@ -1,0 +1,122 @@
+21.1
+
+----------------------------------
+Status de la résolution: OPTIMAL
+Solution calculée
+-> Valeur de la fonction objectif de la solution calculée :  13068.0
+	 0  :  206.0  unités produites
+	 0  :  176.0  unités en stock
+	 0  :  1.0  production lancée
+	 0  :  30  unités demandées
+
+	 1  :  0.0  unités produites
+	 1  :  151.0  unités en stock
+	 1  :  0.0  production lancée
+	 1  :  25  unités demandées
+
+	 2  :  0.0  unités produites
+	 2  :  136.0  unités en stock
+	 2  :  0.0  production lancée
+	 2  :  15  unités demandées
+
+	 3  :  0.0  unités produites
+	 3  :  89.0  unités en stock
+	 3  :  0.0  production lancée
+	 3  :  47  unités demandées
+
+	 4  :  0.0  unités produites
+	 4  :  55.0  unités en stock
+	 4  :  0.0  production lancée
+	 4  :  34  unités demandées
+
+	 5  :  0.0  unités produites
+	 5  :  45.0  unités en stock
+	 5  :  0.0  production lancée
+	 5  :  10  unités demandées
+
+	 6  :  0.0  unités produites
+	 6  :  30.0  unités en stock
+	 6  :  0.0  production lancée
+	 6  :  15  unités demandées
+
+	 7  :  0.0  unités produites
+	 7  :  0.0  unités en stock
+	 7  :  0.0  production lancée
+	 7  :  30  unités demandées
+
+	 8  :  322.0  unités produites
+	 8  :  297.0  unités en stock
+	 8  :  1.0  production lancée
+	 8  :  25  unités demandées
+
+	 9  :  0.0  unités produites
+	 9  :  282.0  unités en stock
+	 9  :  0.0  production lancée
+	 9  :  15  unités demandées
+
+	 10  :  0.0  unités produites
+	 10  :  235.0  unités en stock
+	 10  :  0.0  production lancée
+	 10  :  47  unités demandées
+
+	 11  :  0.0  unités produites
+	 11  :  201.0  unités en stock
+	 11  :  0.0  production lancée
+	 11  :  34  unités demandées
+
+	 12  :  0.0  unités produites
+	 12  :  191.0  unités en stock
+	 12  :  0.0  production lancée
+	 12  :  10  unités demandées
+
+	 13  :  0.0  unités produites
+	 13  :  176.0  unités en stock
+	 13  :  0.0  production lancée
+	 13  :  15  unités demandées
+
+	 14  :  0.0  unités produites
+	 14  :  146.0  unités en stock
+	 14  :  0.0  production lancée
+	 14  :  30  unités demandées
+
+	 15  :  0.0  unités produites
+	 15  :  121.0  unités en stock
+	 15  :  0.0  production lancée
+	 15  :  25  unités demandées
+
+	 16  :  0.0  unités produites
+	 16  :  106.0  unités en stock
+	 16  :  0.0  production lancée
+	 16  :  15  unités demandées
+
+	 17  :  0.0  unités produites
+	 17  :  59.0  unités en stock
+	 17  :  0.0  production lancée
+	 17  :  47  unités demandées
+
+	 18  :  0.0  unités produites
+	 18  :  25.0  unités en stock
+	 18  :  0.0  production lancée
+	 18  :  34  unités demandées
+
+	 19  :  0.0  unités produites
+	 19  :  15.0  unités en stock
+	 19  :  0.0  production lancée
+	 19  :  10  unités demandées
+
+	 20  :  0.0  unités produites
+	 20  :  0.0  unités en stock
+	 20  :  0.0  production lancée
+	 20  :  15  unités demandées
+
+
+ 	 Implémentez l'affichage de la solution !
+1 seconds - new frequency is -100
+Cbc0014I Cut generator 5 (MixedIntegerRounding2) - 182 row cuts average 7.0 elements, 0 column cuts (0 active)  in 0.011 seconds - new frequency is 1
+Cbc0014I Cut generator 6 (FlowCover) - 0 row cuts average 0.0 elements, 0 column cuts (0 active)  in 0.013 seconds - new frequency is -100
+Cbc0014I Cut generator 7 (TwoMirCuts) - 40 row cuts average 10.3 elements, 0 column cuts (0 active)  in 0.003 seconds - new frequency is -100
+Cbc0001I Search completed - best objective 13068, took 1767 iterations and 6 nodes (0.31 seconds)
+Cbc0032I Strong branching done 46 times (471 iterations), fathomed 2 nodes and fixed 5 variables
+Cbc0035I Maximum depth 2, 24 variables fixed on reduced cost
+Total time (CPU seconds):       0.27   (Wallclock seconds):       0.32
+
