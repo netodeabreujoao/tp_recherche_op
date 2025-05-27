@@ -1,4 +1,3 @@
-Instance,Mode,Status,Time(s),Nodes,Objective
-Instance120.1.txt,normal,"TIME LIMIT, FEASIBLE",180.52,,76286.0
-Instance120.1.txt,relaxation,"TIME LIMIT, FEASIBLE",180.63,,77738.0
-Instance120.10.txt,normal,"TIME LIMIT, FEASIBLE",180.45,,86148.0
+Instance,Solution normale,Solution relaxation,Statut meilleure solution,Meilleure solution,Ecart (%),Nb noeuds normal,Nb noeuds relaxation,Temps normal (s),Temps relaxation (s)
+Instance21.1.txt,13068.0,13068.0,OPTIMAL,13068.0,0.0,49,6,0.8,0.45
+Instance120.1.txt,76286.0,77838.0,"TIME LIMIT, FEASIBLE",77838.0,2.03,18765,130514,180.45,180.57

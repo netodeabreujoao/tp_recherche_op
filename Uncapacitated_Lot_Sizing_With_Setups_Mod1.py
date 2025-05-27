@@ -2,6 +2,9 @@ import glob
 import time
 import csv
 import os
+import io
+import sys
+import re
 from mip import *
 
 # Prépare la liste des fichiers
@@ -15,17 +18,35 @@ done_instances = set()
 if os.path.exists(result_file):
     with open(result_file, mode="r", newline="") as f:
         reader = csv.reader(f)
-        next(reader)  # Skip header
+        next(reader)
         for row in reader:
-            done_instances.add((row[0], row[1]))  # (filename, mode)
+            done_instances.add(row[0])  # instance_name seulement
 
 # Ouvrir le fichier en mode ajout
 with open(result_file, mode="a", newline="") as f:
     writer = csv.writer(f)
     if os.stat(result_file).st_size == 0:
-        writer.writerow(["Instance", "Mode", "Status", "Time(s)", "Nodes", "Objective"])
+        writer.writerow([
+            "Instance",
+            "Solution normale",
+            "Solution relaxation",
+            "Statut meilleure solution",
+            "Meilleure solution",
+            "Ecart (%)",
+            "Nb noeuds normal",
+            "Nb noeuds relaxation",
+            "Temps normal (s)",
+            "Temps relaxation (s)"
+        ])
+
 
     for datafile in files:
+        instance_name = datafile.split("/")[-1]
+        if instance_name in done_instances:
+            continue  # Déjà traité
+
+    # datafile = "Instances_ULS/Instance21.1.txt"
+    # instance_name = datafile.split("/")[-1]
         with open(datafile, "r") as file:
             nbPeriodes = int(file.readline().split()[0])
             demandes = list(map(int, file.readline().split()))
@@ -33,11 +54,9 @@ with open(result_file, mode="a", newline="") as f:
             cfixes = list(map(int, file.readline().split()))
             cstock = int(file.readline().split()[0])
 
-        for mode in ["normal", "relaxation"]:
-            instance_name = datafile.split("/")[-1]
-            if (instance_name, mode) in done_instances:
-                continue  # Déjà traité
+        results = {}
 
+        for mode in ["normal", "relaxation"]:
             model = Model(name="ULS", solver_name="CBC")
             model.max_seconds = 180
 
@@ -68,23 +87,59 @@ with open(result_file, mode="a", newline="") as f:
             status = model.optimize()
             duration = time.time() - start
 
-            status_str = {
-                OptimizationStatus.OPTIMAL: "OPTIMAL",
-                OptimizationStatus.FEASIBLE: "TIME LIMIT, FEASIBLE",
-                OptimizationStatus.NO_SOLUTION_FOUND: "TIME LIMIT, NO SOLUTION",
-                OptimizationStatus.INFEASIBLE: "INFEASIBLE",
-                OptimizationStatus.INT_INFEASIBLE: "INFEASIBLE",
-                OptimizationStatus.UNBOUNDED: "UNBOUNDED",
-            }.get(status, str(status))
-
+            print(f"\n=== Instance {instance_name}, mode {mode.upper()} terminée ===")
+            print("Vérifiez le log CBC ci-dessus et entrez le nombre de nœuds explorés : ", end="")
             try:
-                nodes = model.num_nodes
-            except AttributeError:
-                nodes = None
+                nodes_input = int(sys.stdin.readline().strip())
+            except ValueError:
+                print("Entrée invalide, j'enregistre None.")
+                nodes_input = None
+
+
 
             obj = model.objective_value if model.num_solutions > 0 else None
 
-            writer.writerow([
-                instance_name, mode, status_str, round(duration, 2), nodes, obj
-            ])
-            f.flush()  # Pour être sûr que le fichier est mis à jour immédiatement
+            results[mode] = {
+                "objective": obj,
+                "status": status,
+                "nodes": nodes_input,
+                "time": round(duration, 2)
+            }
+
+        obj_n = results["normal"]["objective"]
+        obj_r = results["relaxation"]["objective"]
+
+        # Choix de la "meilleure solution" entre normal (entier) et relaxation
+        if results["normal"]["status"] == OptimizationStatus.OPTIMAL:
+            best_obj = obj_n
+            best_status = "OPTIMAL"
+        elif results["normal"]["status"] == OptimizationStatus.FEASIBLE:
+            best_obj = obj_n
+            best_status = "TIME LIMIT, FEASIBLE"
+        elif results["relaxation"]["status"] in (OptimizationStatus.OPTIMAL, OptimizationStatus.FEASIBLE):
+            best_obj = obj_r
+            best_status = "RELAXATION"
+        else:
+            best_obj = None
+            best_status = str(results["normal"]["status"])
+
+        # Calcul de l'écart en %
+        if obj_n is not None and obj_r is not None:
+            ecart = round(100 * abs(obj_n - obj_r) / obj_n, 2)
+        else:
+            ecart = None
+
+        # Écriture
+        writer.writerow([
+            instance_name,
+            obj_n,
+            obj_r,
+            best_status,
+            best_obj,
+            ecart,
+            results["normal"]["nodes"],
+            results["relaxation"]["nodes"],
+            results["normal"]["time"],
+            results["relaxation"]["time"]
+        ])
+        f.flush()
