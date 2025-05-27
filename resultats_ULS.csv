@@ -1,0 +1,4 @@
+Instance,Mode,Status,Time(s),Nodes,Objective
+Instance120.1.txt,normal,"TIME LIMIT, FEASIBLE",180.52,,76286.0
+Instance120.1.txt,relaxation,"TIME LIMIT, FEASIBLE",180.63,,77738.0
+Instance120.10.txt,normal,"TIME LIMIT, FEASIBLE",180.45,,86148.0

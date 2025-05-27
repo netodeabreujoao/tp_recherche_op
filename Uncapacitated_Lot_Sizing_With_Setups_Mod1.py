@@ -1,107 +1,90 @@
-
-
-datafileName = 'Instances_ULS/Instance60.1.txt'
-
-with open(datafileName, "r") as file:
-    line = file.readline()  
-    lineTab = line.split()    
-    nbPeriodes = int(lineTab[0])
-    
-    line = file.readline()  
-    lineTab = line.split()
-    demandes = []
-    for i in range(nbPeriodes):
-        demandes.append(int(lineTab[i]))
-        
-    line = file.readline()  
-    lineTab = line.split()
-    couts = []
-    for i in range(nbPeriodes):
-        couts.append(int(lineTab[i]))
-
-    line = file.readline()  
-    lineTab = line.split()
-    cfixes = []
-    for i in range(nbPeriodes):
-        cfixes.append(int(lineTab[i]))
-    
-    line = file.readline()  
-    lineTab = line.split()    
-    cstock = int(lineTab[0])
-
-#print(nbPeriodes)
-#print(demandes)
-#print(couts)
-#print(cfixes)
-#print(cstock)
-
-
-
-
-from mip import *
+import glob
 import time
+import csv
+import os
+from mip import *
 
-model = Model(name = "ULS", solver_name="CBC")
+# Prépare la liste des fichiers
+files = sorted(glob.glob("Instances_ULS/*Instance*.txt"))
 
-#POUR AVOIR RELAXATION X PASSE DE INTEGER A CONTINUOUS
+# Fichier pour stocker les résultats
+result_file = "resultats_ULS.csv"
 
-y = [model.add_var(name="y_" + str(i), var_type=BINARY) for i in range(nbPeriodes)]
-x = [model.add_var(name="x_" + str(i), var_type=CONTINUOUS) for i in range(nbPeriodes)]
-s = [model.add_var(name="s_" + str(i), var_type=CONTINUOUS) for i in range(nbPeriodes)]
+# Lire les résultats déjà existants
+done_instances = set()
+if os.path.exists(result_file):
+    with open(result_file, mode="r", newline="") as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip header
+        for row in reader:
+            done_instances.add((row[0], row[1]))  # (filename, mode)
 
+# Ouvrir le fichier en mode ajout
+with open(result_file, mode="a", newline="") as f:
+    writer = csv.writer(f)
+    if os.stat(result_file).st_size == 0:
+        writer.writerow(["Instance", "Mode", "Status", "Time(s)", "Nodes", "Objective"])
 
-model.objective = minimize(xsum(couts[i]*x[i] + cfixes[i]*y[i] + cstock*s[i] for i in range(nbPeriodes)))
-model.max_seconds = 180
+    for datafile in files:
+        with open(datafile, "r") as file:
+            nbPeriodes = int(file.readline().split()[0])
+            demandes = list(map(int, file.readline().split()))
+            couts = list(map(int, file.readline().split()))
+            cfixes = list(map(int, file.readline().split()))
+            cstock = int(file.readline().split()[0])
 
-M = sum(demandes)
-# période 0
-model.add_constr(s[0] == x[0] - demandes[0])
-model.add_constr(demandes[0] <= x[0])
+        for mode in ["normal", "relaxation"]:
+            instance_name = datafile.split("/")[-1]
+            if (instance_name, mode) in done_instances:
+                continue  # Déjà traité
 
-# périodes i>0
-for i in range(1, nbPeriodes):
-    model.add_constr(s[i] == s[i-1] + x[i] - demandes[i])
-    model.add_constr(demandes[i] <= s[i-1] + x[i])
+            model = Model(name="ULS", solver_name="CBC")
+            model.max_seconds = 180
 
+            y = [model.add_var(var_type=BINARY, name=f"y_{i}") for i in range(nbPeriodes)]
+            if mode == "normal":
+                x = [model.add_var(var_type=INTEGER, name=f"x_{i}") for i in range(nbPeriodes)]
+                s = [model.add_var(var_type=INTEGER, name=f"s_{i}") for i in range(nbPeriodes)]
+            else:
+                x = [model.add_var(var_type=CONTINUOUS, name=f"x_{i}") for i in range(nbPeriodes)]
+                s = [model.add_var(var_type=CONTINUOUS, name=f"s_{i}") for i in range(nbPeriodes)]
 
-for i in range(nbPeriodes):
-    model.add_constr(x[i] <= M*y[i])
-    model.add_constr(s[i] >= 0)
-    model.add_constr(x[i] >= 0)
+            model.objective = minimize(
+                xsum(couts[i] * x[i] + cfixes[i] * y[i] + cstock * s[i] for i in range(nbPeriodes))
+            )
 
-#model.write("test.lp")
+            M = sum(demandes)
+            model.add_constr(s[0] == x[0] - demandes[0])
+            model.add_constr(demandes[0] <= x[0])
+            for i in range(1, nbPeriodes):
+                model.add_constr(s[i] == s[i - 1] + x[i] - demandes[i])
+                model.add_constr(demandes[i] <= s[i - 1] + x[i])
+            for i in range(nbPeriodes):
+                model.add_constr(x[i] <= M * y[i])
+                model.add_constr(s[i] >= 0)
+                model.add_constr(x[i] >= 0)
 
-# Mesure du temps
-start_time = time.time()
-status = model.optimize()
-end_time = time.time()
+            start = time.time()
+            status = model.optimize()
+            duration = time.time() - start
 
-print("\n" + "-"*50)
-# 1) Statut
-if status == OptimizationStatus.OPTIMAL:
-    print("Status de la résolution : OPTIMAL")
-elif status == OptimizationStatus.FEASIBLE:
-    print("Status de la résolution : TEMPS LIMITE et SOLUTION RÉALISABLE CALCULÉE")
-elif status == OptimizationStatus.NO_SOLUTION_FOUND:
-    print("Status de la résolution : TEMPS LIMITE et AUCUNE SOLUTION CALCULÉE")
-elif status in (OptimizationStatus.INFEASIBLE, OptimizationStatus.INT_INFEASIBLE):
-    print("Status de la résolution : IRRÉALISABLE")
-elif status == OptimizationStatus.UNBOUNDED:
-    print("Status de la résolution : NON BORNÉ")
-else:
-    print(f"Status de la résolution : {status}")
+            status_str = {
+                OptimizationStatus.OPTIMAL: "OPTIMAL",
+                OptimizationStatus.FEASIBLE: "TIME LIMIT, FEASIBLE",
+                OptimizationStatus.NO_SOLUTION_FOUND: "TIME LIMIT, NO SOLUTION",
+                OptimizationStatus.INFEASIBLE: "INFEASIBLE",
+                OptimizationStatus.INT_INFEASIBLE: "INFEASIBLE",
+                OptimizationStatus.UNBOUNDED: "UNBOUNDED",
+            }.get(status, str(status))
 
-print(f"Temps d'exécution        : {end_time - start_time:.2f} s")
+            try:
+                nodes = model.num_nodes
+            except AttributeError:
+                nodes = None
 
-# 3) Solution détaillée
-# if model.num_solutions > 0:
-#     print("\nSolution calculée :")
-#     print("→ Valeur de la fct objectif :", model.objective_value)
-#     for i in range(nbPeriodes):
-#         print(f"\tPériode {i} : production = {x[i].x:.0f}, "
-#               f"stock = {s[i].x:.0f}, lancement = {y[i].x:.0f}, "
-#               f"demandes = {demandes[i]}")
-# else:
-#     print("\nAucune solution disponible.")
+            obj = model.objective_value if model.num_solutions > 0 else None
 
-print("-"*50)
+            writer.writerow([
+                instance_name, mode, status_str, round(duration, 2), nodes, obj
+            ])
+            f.flush()  # Pour être sûr que le fichier est mis à jour immédiatement
