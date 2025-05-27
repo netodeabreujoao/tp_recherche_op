@@ -1,111 +1,138 @@
-from mip import *
 import glob
 import time
 import csv
 import os
+import sys
+from mip import *
 
+# Dossier des instances et fichier de résultats
 files = sorted(glob.glob("Instances_ULS/*Instance*.txt"))
 result_file = "resultats_ULS_xij.csv"
 
-done_instances = set()
+# On saute les instances déjà traitées
+done = set()
 if os.path.exists(result_file):
-    with open(result_file, mode="r", newline="") as f:
+    with open(result_file, newline="") as f:
         reader = csv.reader(f)
-        next(reader)
+        next(reader, None)
         for row in reader:
-            done_instances.add((row[0], row[1]))
+            done.add(row[0])
 
 with open(result_file, mode="a", newline="") as f:
     writer = csv.writer(f)
+    # Écrire l'en-tête si le fichier est vide
     if os.stat(result_file).st_size == 0:
-        writer.writerow(["Instance", "Mode", "Status", "Time(s)", "Nodes", "Objective"])
+        writer.writerow([
+            "Instance",
+            "Solution normale",
+            "Solution relaxation",
+            "Statut meilleure solution",
+            "Meilleure solution",
+            "Ecart (%)",
+            "Nb noeuds normal",
+            "Nb noeuds relaxation",
+            "Temps normal (s)",
+            "Temps relaxation (s)"
+        ])
 
+    # Pour chaque fichier d'instance
+    for datafile in files:
+        inst = os.path.basename(datafile)
+        if inst in done:
+            continue
 
-    for datafileName in files:
+        # Lecture des données
+        with open(datafile) as fd:
+            n       = int(fd.readline().split()[0])
+            demandes= list(map(int, fd.readline().split()))
+            couts   = list(map(int, fd.readline().split()))
+            cfixes  = list(map(int, fd.readline().split()))
+            h       = int(fd.readline().split()[0])
 
-        with open(datafileName, "r") as file:
-            line = file.readline()  
-            lineTab = line.split()    
-            nbPeriodes = int(lineTab[0])
-            
-            line = file.readline()  
-            lineTab = line.split()
-            demandes = []
-            for i in range(nbPeriodes):
-                demandes.append(int(lineTab[i]))
-                
-            line = file.readline()  
-            lineTab = line.split()
-            couts = []
-            for i in range(nbPeriodes):
-                couts.append(int(lineTab[i]))
+        results = {}
 
-            line = file.readline()  
-            lineTab = line.split()
-            cfixes = []
-            for i in range(nbPeriodes):
-                cfixes.append(int(lineTab[i]))
-            
-            line = file.readline()  
-            lineTab = line.split()    
-            cstock = int(lineTab[0])
-
-        #print(nbPeriodes)
-        #print(demandes)
-        #print(couts)
-        #print(cfixes)
-        #print(cstock)
-
-
+        # Deux modes : entier puis relaxation
         for mode in ["normal", "relaxation"]:
-            instance_name = datafile.split("/")[-1]
-            if (instance_name, mode) in done_instances:
-                continue
+            m = Model(name="ULS_xij", solver_name="CBC")
+            m.max_seconds = 180
 
-            model = Model(name="ULS_xij", solver_name="CBC")
-            model.max_seconds = 180
-
-            x = [[model.add_var(var_type=(BINARY if mode == "normal" else CONTINUOUS), name=f"x_{i}_{j}")
-                  for j in range(nb)] for i in range(nb)]
-            y = [model.add_var(var_type=BINARY, name=f"y_{i}") for i in range(nb)]
+            # Variables x[i][j] et y[i]
+            x = [[
+                m.add_var(var_type=(BINARY if mode=="normal" else CONTINUOUS),
+                          name=f"x_{i}_{j}")
+                for j in range(n)
+            ] for i in range(n)]
+            y = [m.add_var(var_type=BINARY, name=f"y_{i}") for i in range(n)]
 
             # Objectif
-            model.objective = minimize(
-                xsum(
-                    (c[i] + h * (j - i)) * d[j] * x[i][j]
-                    for i in range(nb) for j in range(i, nb)
-                ) + xsum(f_costs[i] * y[i] for i in range(nb))
+            m.objective = minimize(
+                xsum((couts[i] + h*(j-i)) * demandes[j] * x[i][j]
+                     for i in range(n) for j in range(i, n))
+                + xsum(cfixes[i] * y[i] for i in range(n))
             )
 
             # Contraintes
-            for j in range(nb):
-                model += xsum(x[i][j] for i in range(j + 1)) == 1  # chaque demande est satisfaite exactement une fois
+            # 1) Chaque demande j est produite exactement une fois
+            for j in range(n):
+                m += xsum(x[i][j] for i in range(j+1)) == 1
 
-            for i in range(nb):
-                for j in range(i, nb):
-                    model += x[i][j] <= y[i]  # si on produit pour j à i, alors y_i = 1
+            # 2) Si on produit à i pour j, y[i] doit être 1
+            for i in range(n):
+                for j in range(i, n):
+                    m += x[i][j] <= y[i]
 
+            # Résolution
             start = time.time()
-            status = model.optimize()
+            status = m.optimize()
             duration = time.time() - start
 
-            status_str = {
-                OptimizationStatus.OPTIMAL: "OPTIMAL",
-                OptimizationStatus.FEASIBLE: "TIME LIMIT, FEASIBLE",
-                OptimizationStatus.NO_SOLUTION_FOUND: "TIME LIMIT, NO SOLUTION",
-                OptimizationStatus.INFEASIBLE: "INFEASIBLE",
-                OptimizationStatus.INT_INFEASIBLE: "INFEASIBLE",
-                OptimizationStatus.UNBOUNDED: "UNBOUNDED",
-            }.get(status, str(status))
-
+            # Saisie manuelle du nombre de nœuds
+            print(f"\n=== Instance {inst}, mode {mode.upper()} terminé ===")
+            print("Entrez le nombre de nœuds explorés par CBC :", end=" ")
             try:
-                nodes = model.num_nodes
-            except AttributeError:
+                nodes = int(sys.stdin.readline().strip())
+            except ValueError:
+                print("Entrée invalide → None")
                 nodes = None
 
-            obj = model.objective_value if model.num_solutions > 0 else None
+            # Récupération de l'objectif
+            obj = m.objective_value if m.num_solutions > 0 else None
 
-            writer.writerow([
-                instance_name, mode, status_str, round(duration, 2), nodes, obj
-            ])
-            f.flush()
+            results[mode] = {
+                "objective": obj,
+                "status":     status,
+                "nodes":      nodes,
+                "time":       round(duration, 2)
+            }
+
+        # Calcul du meilleur statut et de l'écart
+        obj_n = results["normal"]["objective"]
+        obj_r = results["relaxation"]["objective"]
+        stat_n = results["normal"]["status"]
+
+        if stat_n == OptimizationStatus.OPTIMAL:
+            best_stat, best_obj = "OPTIMAL", obj_n
+        elif stat_n == OptimizationStatus.FEASIBLE:
+            best_stat, best_obj = "TIME LIMIT, FEASIBLE", obj_n
+        elif results["relaxation"]["status"] in (OptimizationStatus.OPTIMAL, OptimizationStatus.FEASIBLE):
+            best_stat, best_obj = "RELAXATION", obj_r
+        else:
+            best_stat, best_obj = str(stat_n), None
+
+        ecart = (round(100 * abs(obj_n - obj_r) / obj_n, 2)
+                 if obj_n is not None and obj_r is not None else None)
+
+        # Écriture de la ligne résumée
+        writer.writerow([
+            inst,
+            obj_n,
+            obj_r,
+            best_stat,
+            best_obj,
+            ecart,
+            results["normal"]["nodes"],
+            results["relaxation"]["nodes"],
+            results["normal"]["time"],
+            results["relaxation"]["time"]
+        ])
+        f.flush()
