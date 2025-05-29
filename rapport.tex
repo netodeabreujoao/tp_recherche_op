@@ -1,0 +1,252 @@
+%%
+%% @filename rapport.tex
+%% @date 2025-05-29
+%% author Joao Pedro NETO DE BREU <jnetodeabre@enseirb-matmeca.fr>
+%% @brief . . . 
+%%
+\documentclass[a4paper,12pt]{article}
+ 
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+ 
+% Figures
+\usepackage{graphicx}
+\usepackage{amsthm}
+\graphicspath{{./img/}}
+ 
+% Math
+\usepackage{amsmath, amssymb}
+\newtheorem{defi}{Définition}
+ 
+% Algortihmes
+\usepackage[vlined,lined,linesnumbered,boxed,french]{algorithm2e}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator{\myfunc}{myfunc}
+\DeclareMathOperator*{\sign}{sign}
+\DeclareMathOperator*{\imwh}{width}
+\DeclareMathOperator*{\imht}{height}
+ 
+% Extra
+\usepackage[left=3cm,right=3cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{awesomebox}
+\usepackage{cancel}
+\usepackage{xcolor}
+\usepackage{fullpage}
+\usepackage{url}
+\usepackage{footnote}
+\usepackage{footmisc}
+\usepackage{setspace}
+\usepackage{sectsty}
+% Style pour les définitions (en bleu)
+\newtheoremstyle{blueDefinition}% Nom du style
+{\topsep}   % Espace au-dessus
+{\topsep}   % Espace en-dessous
+{\itshape}  % Corps du texte en italique
+{}          % Indentation
+{\color{blue}\bfseries}  % En-tête en bleu, en gras
+{.}         % Ponctuation après l'en-tête
+{ }         % Espace après l'en-tête
+{\thmname{#1}\thmnumber{ #2} \thmnote{ (#3)}}  % Format d'affichage
+ 
+% Style pour les propriétés (en vert)
+\newtheoremstyle{redProperty}% Nom du style
+{\topsep}   % Espace au-dessus
+{\topsep}   % Espace en-dessous
+{\itshape}  % Corps du texte en italique
+{}          % Indentation
+{\color{red}\bfseries}  % En-tête en vert, en gras
+{.}         % Ponctuation après l'en-tête
+{ }         % Espace après l'en-tête
+{\thmname{#1}\thmnumber{ #2} \thmnote{ (#3)}}  % Format d'affichage
+ 
+% Théorèmes (style standard)
+\newtheorem{thm}{Théorème}[section]
+ 
+% Application des styles
+\theoremstyle{blueDefinition}
+\newtheorem{dfn}[thm]{Définition}
+ 
+\theoremstyle{redProperty}
+\newtheorem{prop}[thm]{Propriété}
+ 
+% Définir les couleurs pour les titres
+\definecolor{DarkGray}{rgb}{0.3, 0.3, 0.3}
+\sectionfont{\color{red}}        % Sections en rouge
+\subsectionfont{\color{cyan}}     % Sous-sections en rouge
+\subsubsectionfont{\color{DarkGray}}  % Sous-sous-sections en rouge
+
+\title{Projet ULS}
+\author{Joao Pedro NETO DE BREU - Toine HORNY}
+\date{Mai 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Premier Modèle}
+
+Pour écrire le modèle, nous devons utiliser les notations suivantes :
+\begin{itemize}
+    \item $ y_i = \begin{cases}
+        1 & \text{ si on produit à la période i, } \forall i \in \{1, \dots, n\} \\
+        0 & \text{ sinon}
+    \end{cases}$
+    \item $x_i$ = la quantité produite à la période i, $\forall i \in \{1, \dots, n\}$
+    \item $s_i$ = la quantité stockée à la fin de la période i, $\forall i \in \{1, \dots, n\}$
+    \item $d_i$ = la demande à satisfaire à la période i, $\forall i \in \{1, \dots, n\}$
+    \item $c_i$ = le coût de production à la période i, $\forall i \in \{1, \dots, n\}$
+    \item $h$ = le coût de stockage par unité de produit
+    \item $f_i$ = la configuration de la machine à la période i, $\forall i \in \{1, \dots, n\}$
+\end{itemize}
+
+\vspace{10pt}
+
+Nous avons developpé un modèle de programmation linéaire pour minimiser le coût total de production et de stockage, tout en respectant les contraintes de demande et de capacité de production. Le modèle est formulé comme suit :
+\begin{equation}
+    \min \sum_{i=1}^{n} c_i \times x_i + f_i \times y_i + h \times s_i 
+\end{equation}
+
+Sous les contraintes :
+\begin{align}
+    s_1 &= x_1 - d_1 \\
+    d_1 &\leq x_1 \\
+    s_i &= s_{i-1} + x_i - d_i, \quad \forall i \in \{2, \dots, n\} \\
+    d_i &\leq x_i + s_{i-1}, \quad \forall i \in \{2, \dots, n\} \\
+    x_i &\leq M \times y_i \forall i \in \{1, \dots, n\} \label{eq:BigM} \\
+    s_i &\geq 0, \quad \forall i \in \{1, \dots, n\} \\
+    x_i &\geq 0, \quad \forall i \in \{1, \dots, n\} \\
+    y_i &\in \{0, 1\}, \quad \forall i \in \{1, \dots, n\} \\
+\end{align}
+
+La variable $M$ dans l'équation \ref{eq:BigM} est une constante suffisamment grande pour garantir que si la machine est configurée à la période $i$, alors la contrainte est vraie.
+Nous avons donc décidé de faire : $ M = \sum_{i=1}^{n} d_i $.
+
+Après avoir appliqué le modèle à toutes les instances, nous avons obtenu les valeurs suivantes :
+
+\begin{table}[htbp]
+\hspace*{-2cm} 
+\begin{tabular}{|l|p{40pt}|p{40pt}|p{55pt}|p{45pt}|p{35pt}|p{35pt}|p{35pt}|p{35pt}|p{35pt}|}
+\hline Instance           & Solution normale & Solution relaxation & Statut meilleure solution & Meilleure solution & Ecart & Nb noeuds normal & Nb noeuds relaxation & Temps normal (s) & Temps relaxation (s) \\ \hline
+Instance21,1,txt   & 13068            & 13068               & Optimale                  & 13068              & 0          & 49               & 6                    & 0,8              & 0,45                 \\
+Instance120,1,txt  & 76286            & 77838               & Réalisable                & 77838              & 0          & 18765            & 130514               & 180,45           & 180,57               \\
+Instance120,10,txt & 86148            & 87031               & Réalisable                & 87031              & 0          & 22681            & 276728               & 180,57           & 180,45               \\
+Instance120,2,txt  & 67630            & 69437               & Réalisable                & 69437              & 0          & 16495            & 113536               & 180,33           & 180,43               \\
+Instance120,3,txt  & 86958            & 87616               & Réalisable                & 87616              & 0          & 14219            & 123212               & 180,55           & 180,6                \\
+Instance120,4,txt  & 83660            & 84612               & Réalisable                & 84612              & 0          & 12381            & 123648               & 180,43           & 180,5                \\
+Instance120,5,txt  & 109314           & 97819               & Réalisable                & 109314             & 11495      & 14655            & 113464               & 180,37           & 180,53               \\
+Instance120,6,txt  & 65864            & 66161               & Réalisable                & 66161              & 0          & 11188            & 119275               & 180,73           & 180,59               \\
+Instance120,7,txt  & 82471            & 82959               & Réalisable                & 82959              & 0          & 16674            & 30560                & 180,45           & 180,43               \\
+Instance120,8,txt  & 72059            & 71668               & Réalisable                & 72059              & 391        & 19814            & 132328               & 180,34           & 180,48               \\
+Instance120,9,txt  & 89154            & 90743               & Réalisable                & 90743              & 0          & 9005             & 109562               & 180,2            & 180,5                \\
+Instance60,1,txt   & 29739            & 29739               & Réalisable                & 29739              & 0          & 472168           & 567418               & 180,19           & 180,26               \\
+Instance60,10,txt  & 31809            & 31809               & Réalisable                & 31809              & 0          & 437455           & 66976                & 180,14           & 122,49               \\
+Instance60,2,txt   & 27572            & 27572               & Optimale                  & 27572              & 0          & 82575            & 664459               & 26,92            & 180,34               \\
+Instance60,3,txt   & 34081            & 34126               & Réalisable                & 34126              & 0          & 753328           & 2032824              & 180,12           & 180,16               \\
+Instance60,4,txt   & 31131            & 31131               & Optimale                  & 31131              & 0          & 94978            & 1162213              & 35,5             & 180,12               \\
+Instance60,5,txt   & 35693            & 35693               & Réalisable                & 35693              & 0          & 205577           & 1246737              & 180,39           & 180,27               \\
+Instance60,6,txt   & 25186            & 25186               & Optimale                  & 25186              & 0          & 184255           & 2257755              & 65,49            & 180,16               \\
+Instance60,7,txt   & 30853            & 30853               & Réalisable                & 30853              & 0          & 217518           & 932198               & 180,4            & 162,63               \\
+Instance60,8,txt   & 27962            & 27962               & Réalisable                & 27962              & 0          & 322203           & 3132403              & 180,23           & 180,04               \\
+Instance60,9,txt   & 35492            & 35492               & Réalisable                & 35492              & 0          & 622139           & 2396972              & 180,3            & 180,19               \\
+Instance90,1,txt   & 51079            & 51629               & Réalisable                & 51629              & 0          & 15092            & 88238                & 180,65           & 180,84               \\
+Instance90,10,txt  & 58081            & 57068               & Réalisable                & 58081              & 1013       & 15750            & 147151               & 180,68           & 180,71               \\
+Instance90,2,txt   & 46902            & 46720               & Réalisable                & 46902              & 182        & 17219            & 84266                & 180,55           & 180,68               \\
+Instance90,3,txt   & 57613            & 58241               & Réalisable                & 58241              & 0          & 12566            & 129358               & 180,88           & 180,65               \\
+Instance90,4,txt   & 53897            & 53949               & Réalisable                & 53949              & 0          & 26016            & 137294               & 180,94           & 180,62               \\
+Instance90,5,txt   & 64833            & 64307               & Réalisable                & 64833              & 526        & 15564            & 142210               & 180,87           & 180,78               \\
+Instance90,6,txt   & 41811            & 42036               & Réalisable                & 42036              & 0          & 24986            & 129933               & 181,37           & 180,58               \\
+Instance90,7,txt   & 55257            & 55714               & Réalisable                & 55714              & 0          & 16108            & 137342               & 180,54           & 180,69               \\
+Instance90,8,txt   & 49097            & 49910               & Réalisable                & 49910              & 0          & 14690            & 142866               & 180,84           & 180,75               \\
+Instance90,9,txt   & 60432            & 59951               & Réalisable                & 60432              & 481        & 15187            & 113176               & 181,09           & 180,85               \\
+Toy\_Instance,txt  & 1788             & 1788                & Optimale                  & 1788               & 0          & 3                & 0                    & 0,09             & 0,05                \\ \hline
+\end{tabular}
+\caption{Résultats du premier modèle}
+\label{tab:resultats_uls}
+\end{table}
+
+\section{Deuxième Modèle}
+
+Pour le deuxième modèle, nous n'avons plus de limite sur la quantité produite chaque mois.
+Donc nous avons des nouvelles variables :
+\begin{itemize}
+    \item $x_{ij} = \begin{cases}
+        1 & \parbox[t]{.7\linewidth}{si on fabrique à la période \(i\) les produits pour la demande de la période \(j\), \(i \in \{1, \dots, n\}, j \in \{1, \dots, m\}, i \leq j\)} \\
+        0 & \text{ sinon}
+    \end{cases}$
+    \item $ y_i = \begin{cases}
+        1 & \text{ si on produit à la période i, } \forall i \in \{1, \dots, n\} \\
+        0 & \text{ sinon}
+    \end{cases}$
+\end{itemize}
+
+\vspace{10pt}
+
+Nous avons développé le modèle de programmation linéaire suivant :
+\begin{equation}
+    \min \sum_{i=1}^{n} \sum_{j=i}^{n} (c_i + h \times ( j - i )) \times d_i \times x_{ij} + \sum_{i=1}^{n} f_i \times y_i 
+\end{equation}
+
+Cet objectif répond à la minimisation du coût total parce que :
+\begin{itemize}
+    \item Pour chaque période $j$, nous devons produire la quantité $d_j$
+    \item Si nous produisons à la période $i$, nous devons: \begin{itemize}
+        \item $c_i \times d_j$: coût unitaire de production au mois $i$
+        \item $h( j - i ) \times d_j$: coût de stockage depuis $i$ jusqu'à $j$
+    \end{itemize}
+    \item Si on utilise le mois $i$ pour produire (même pour une seule demande), on paie le setup $f_i$, via la variable $y_i$
+\end{itemize}
+
+\vspace{10pt}
+
+Puis nous avons les contraintes suivantes :
+\begin{align}
+    \sum_{i=1}^{j} x_{ij} &= 1, \quad \forall j \in \{1, \dots, n\}  \\
+    x_{ij} &\leq y_i, \quad \forall i \leq j \in \{1, \dots, n\} \\
+    x_{ij} &\in \{0, 1\}, \quad \forall i \leq j \in \{1, \dots, n\} \\
+    y_i &\in \{0, 1\}, \quad \forall i \in \{1, \dots, n\} \\
+\end{align}
+
+
+Après avoir appliqué le modèle à toutes les instances, nous avons obtenu les valeurs suivantes :
+
+\begin{table}[htbp]
+\hspace*{-2cm} 
+\begin{tabular}{|l|p{40pt}|p{40pt}|p{55pt}|p{45pt}|p{35pt}|p{35pt}|p{35pt}|p{35pt}|p{35pt}|}
+\hline Instance           & Solution normale & Solution relaxation & Statut meilleure solution & Meilleure solution & Ecart & Nb noeuds normal & Nb noeuds relaxation & Temps normal (s) & Temps relaxation (s) \\ \hline
+Instance120.1.txt  & 75417            & 75417               & Optimale                   & 75417              & 0          & 0                & 0                    & 1.0              & 0.78                 \\
+Instance120.10.txt & 85103            & 85103               & Optimale                   & 85103              & 0          & 0                & 0                    & 0.97             & 0.79                 \\
+Instance120.2.txt  & 67630            & 67630               & Optimale                   & 67630              & 0          & 0                & 0                    & 0.95             & 0.75                 \\
+Instance120.3.txt  & 86778            & 86778               & Optimale                   & 86778              & 0          & 0                & 0                    & 0.9              & 0.76                 \\
+Instance120.4.txt  & 82367            & 82367               & Optimale                   & 82367              & 0          & 0                & 0                    & 0.94             & 0.77                 \\
+Instance120.5.txt  & 96316            & 96316               & Optimale                   & 96316              & 0          & 0                & 0                    & 0.94             & 0.76                 \\
+Instance120.6.txt  & 65704            & 65704               & Optimale                   & 65704              & 0          & 0                & 0                    & 0.93             & 0.8                  \\
+Instance120.7.txt  & 81866            & 81866               & Optimale                   & 81866              & 0          & 0                & 0                    & 0.93             & 0.81                 \\
+Instance120.8.txt  & 70734            & 70734               & Optimale                   & 70734              & 0          & 0                & 0                    & 0.94             & 0.78                 \\
+Instance120.9.txt  & 87909            & 87909               & Optimale                   & 87909              & 0          & 0                & 0                    & 0.93             & 0.74                 \\
+Instance21.1.txt   & 13068            & 13068               & Optimale                   & 13068              & 0          & 0                & 0                    & 0.03             & 0.03                 \\
+Instance60.1.txt   & 29739            & 29739               & Optimale                   & 29739              & 0          & 0                & 0                    & 0.17             & 0.13                 \\
+Instance60.10.txt  & 31809            & 31809               & Optimale                   & 31809              & 0          & 0                & 0                    & 0.16             & 0.14                 \\
+Instance60.2.txt   & 27572            & 27572               & Optimale                   & 27572              & 0          & 0                & 0                    & 0.17             & 0.13                 \\
+Instance60.3.txt   & 34081            & 34081               & Optimale                   & 34081              & 0          & 0                & 0                    & 0.16             & 0.13                 \\
+Instance60.4.txt   & 31131            & 31131               & Optimale                   & 31131              & 0          & 0                & 0                    & 0.17             & 0.13                 \\
+Instance60.5.txt   & 35693            & 35693               & Optimale                   & 35693              & 0          & 0                & 0                    & 0.16             & 0.13                 \\
+Instance60.6.txt   & 25186            & 25186               & Optimale                   & 25186              & 0          & 0                & 0                    & 0.2              & 0.12                 \\
+Instance60.7.txt   & 30853            & 30853               & Optimale                   & 30853              & 0          & 0                & 0                    & 0.15             & 0.12                 \\
+Instance60.8.txt   & 27962            & 27962               & Optimale                   & 27962              & 0          & 0                & 0                    & 0.19             & 0.14                 \\
+Instance60.9.txt   & 35492            & 35492               & Optimale                   & 35492              & 0          & 0                & 0                    & 0.16             & 0.13                 \\
+Instance90.1.txt   & 50943            & 50943               & Optimale                   & 50943              & 0          & 0                & 0                    & 0.44             & 0.34                 \\
+Instance90.10.txt  & 56514            & 56514               & Optimale                   & 56514              & 0          & 0                & 0                    & 0.43             & 0.35                 \\
+Instance90.2.txt   & 46518            & 46518               & Optimale                   & 46518              & 0          & 0                & 0                    & 0.43             & 0.37                 \\
+Instance90.3.txt   & 57613            & 57613               & Optimale                   & 57613              & 0          & 0                & 0                    & 0.46             & 0.34                 \\
+Instance90.4.txt   & 53897            & 53897               & Optimale                   & 53897              & 0          & 0                & 0                    & 0.45             & 0.34                 \\
+Instance90.5.txt   & 64123            & 64123               & Optimale                   & 64123              & 0          & 0                & 0                    & 0.45             & 0.33                 \\
+Instance90.6.txt   & 41811            & 41811               & Optimale                   & 41811              & 0          & 0                & 0                    & 0.44             & 0.34                 \\
+Instance90.7.txt   & 54913            & 54913               & Optimale                   & 54913              & 0          & 0                & 0                    & 0.43             & 0.33                 \\
+Instance90.8.txt   & 49010            & 49010               & Optimale                   & 49010              & 0          & 0                & 0                    & 0.43             & 0.34                 \\
+Instance90.9.txt   & 59424            & 59424               & Optimale                   & 59424              & 0          & 0                & 0                    & 0.44             & 0.33                 \\
+Toy\_Instance.txt  & 1788             & 1788                & Optimale                   & 1788               & 0          & 0                & 0                    & 0.05             & 0.01                \\ \hline
+\end{tabular}
+\caption{Résultats du deuxième modèle}
+\label{tab:resultats_uls_pfixed}
+\end{table}
+\end{document}
