@@ -37,6 +37,8 @@
 \usepackage{footmisc}
 \usepackage{setspace}
 \usepackage{sectsty}
+\usepackage[colorlinks=true, linkcolor=blue]{hyperref}
+
 % Style pour les définitions (en bleu)
 \newtheoremstyle{blueDefinition}% Nom du style
 {\topsep}   % Espace au-dessus
@@ -164,7 +166,8 @@ Toy\_Instance.txt  & 1788             & 1788                & Optimale          
 \label{tab:resultats_uls}
 \end{table}
 \newpage
-On observe que dans la plupart des cas, la meilleure solution est atteinte soit par la solution normale dans le cas optimal soit par la relaxation. On observe bien que le nombre de noeuds de la relaxation est bien supérieur par rapport à la solution normale. De même, le temps de relaxation est supérieur car il recherche la solution au plus près en continu ce qui le ralentit considérablement dans le cas où la solution est optimale. Dans le cas où la solution n'est que réalisable, on observe que les temps sont similaires.
+\subsection*{Analyse des résultats}
+On observe que, dans la plupart des cas, la meilleure solution est atteinte soit par la solution normale lorsque celle-ci est optimale, soit par la relaxation. Le nombre de nœuds explorés en relaxation est généralement bien plus élevé que dans la version normale. De même, le temps de résolution en relaxation est souvent supérieur, car la recherche d'une solution continue proche de l'optimum ralentit le processus lorsqu'une solution entière optimale existe déjà. En revanche, lorsque la solution obtenue n'est que réalisable, les temps de résolution entre les deux approches sont similaires.
 \section{Deuxième Modèle}
 
 Pour le deuxième modèle, nous n'avons plus de limite sur la quantité produite chaque mois.
@@ -250,4 +253,23 @@ Toy\_Instance.txt  & 1788             & 1788                & Optimale          
 \caption{Résultats du deuxième modèle}
 \label{tab:resultats_uls_pfixed}
 \end{table}
+
+\subsection*{Analyse des résultats}
+Le tableau~\ref{tab:resultats_uls_pfixed} présente les indicateurs pour ce second modèle. On observe :
+\begin{itemize}
+\item \textbf{Temps de résolution} : toutes les instances se résolvent très rapidement (moins de 1~s en mode entier), car le nombre de variables binaires est plus faible.
+\item \textbf{Nombre de nœuds} : toujours nul (puisque les solutions sont trouvées au noeud racine), confirmant l'efficacité de la formulation $x_{ij}$.
+\item \textbf{Qualité} : aucun écart entre relaxation et entier, identique au premier modèle.
+\end{itemize}
+
+\section*{Conclusion}
+Cette étude a mis en évidence plusieurs points clés :
+\begin{itemize}
+  \item Les deux formulations — variables classiques $(x_i,s_i,y_i)$ et formulation par assignation $(x_{ij},y_i)$ — conduisent, dans la majorité des instances, aux mêmes solutions de coût minimal, sans écart entre les valeurs entières et celles de la relaxation.
+  \item Le modèle $x_{ij}$ est plus efficace en pratique : il résout toutes les instances au nœud racine, avec un nombre de nœuds explorés nul et des temps de résolution toujours inférieurs à 1~s.
+  \item Le modèle standard $(x_i,s_i)$ peut nécessiter un grand nombre de nœuds et atteindre la limite de temps (180~s) sur les plus grosses instances, même si la relaxation n'améliore pas l'objectif.
+\end{itemize}
+En conclusion la formulation par variables $x_{ij}$ se révèle plus robuste et plus rapide, tandis que le modèle classique souffre d'une exploration d'arbre importante pour certaines instances, ce qui peut conduire à des temps de calcul très importants.
+
+
 \end{document}
